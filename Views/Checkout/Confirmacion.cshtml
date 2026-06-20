@@ -1,0 +1,68 @@
+@using EcommerceDemo.Models
+@model Orden
+@{
+    ViewData["Title"] = "Pedido Confirmado";
+    var items = ViewBag.Items as List<OrdenItem> ?? new();
+}
+
+<div class="container py-5" style="max-width:700px;">
+    <div class="card shadow-sm border-0 text-center">
+        <div class="card-body py-5">
+            <div class="mb-3">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white"
+                      style="width:80px; height:80px; font-size:2.5rem;">
+                    <i class="fas fa-check"></i>
+                </span>
+            </div>
+            <h2 class="fw-bold text-success">¡Pedido Confirmado!</h2>
+            <p class="text-muted mb-1">Tu pedido ha sido recibido correctamente.</p>
+            <h5 class="fw-bold mt-2 mb-4">Número de orden: <span class="text-warning">@Model.NumeroOrden</span></h5>
+
+            <div class="card bg-light border-0 text-start mb-4">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">Detalle del pedido</h6>
+                    @foreach (var item in items)
+                    {
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>@item.ProductoNombre <span class="text-muted">x@item.Cantidad</span></span>
+                            <span>$@item.Subtotal.ToString("F2")</span>
+                        </div>
+                    }
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total pagado</span>
+                        <span>$@Model.Total.ToString("F2")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-light border-0 text-start mb-4">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-2">Datos del cliente</h6>
+                    <p class="mb-1 small"><i class="fas fa-user me-2 text-muted"></i>@Model.ClienteNombre</p>
+                    <p class="mb-1 small"><i class="fas fa-envelope me-2 text-muted"></i>@Model.ClienteEmail</p>
+                    <p class="mb-1 small"><i class="fas fa-phone me-2 text-muted"></i>@Model.ClienteTelefono</p>
+                    @if (!string.IsNullOrEmpty(Model.ClienteDireccion))
+                    {
+                        <p class="mb-0 small"><i class="fas fa-map-marker-alt me-2 text-muted"></i>@Model.ClienteDireccion</p>
+                    }
+                </div>
+            </div>
+
+            <div class="alert alert-info text-start">
+                <i class="fas fa-info-circle me-2"></i>
+                Recibirás un email de confirmación en <strong>@Model.ClienteEmail</strong>.
+                Nuestro equipo se pondrá en contacto contigo en las próximas horas.
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center mt-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-dark">
+                    <i class="fas fa-home me-1"></i>Volver al inicio
+                </a>
+                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-warning fw-semibold">
+                    <i class="fas fa-search me-1"></i>Seguir comprando
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,101 @@
+@using EcommerceDemo.Models
+@model Orden
+@{
+    ViewData["Title"] = "Orden " + Model.NumeroOrden;
+    ViewData["AdminPage"] = "ordenes";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    var items = ViewBag.Items as List<OrdenItem> ?? new();
+}
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header fw-semibold">Productos del pedido</div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead class="table-light"><tr><th>Producto</th><th>SKU</th><th>Precio</th><th>Cant.</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in items)
+                        {
+                            <tr>
+                                <td class="small fw-semibold">@item.ProductoNombre</td>
+                                <td class="small text-muted">@item.ProductoSKU</td>
+                                <td class="small">$@item.PrecioUnitario.ToString("F2")</td>
+                                <td class="small">@item.Cantidad</td>
+                                <td class="small fw-bold">$@item.Subtotal.ToString("F2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr><td colspan="4" class="text-end fw-bold">Total</td><td class="fw-bold fs-6">$@Model.Total.ToString("F2")</td></tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header fw-semibold">Datos del cliente</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6"><span class="text-muted small">Nombre</span><div class="fw-semibold">@Model.ClienteNombre</div></div>
+                    <div class="col-md-6"><span class="text-muted small">Email</span><div>@Model.ClienteEmail</div></div>
+                    <div class="col-md-6"><span class="text-muted small">Teléfono</span><div>@Model.ClienteTelefono</div></div>
+                    <div class="col-md-6"><span class="text-muted small">Dirección</span><div>@(string.IsNullOrEmpty(Model.ClienteDireccion) ? "—" : Model.ClienteDireccion)</div></div>
+                    @if (!string.IsNullOrEmpty(Model.Notas))
+                    {
+                        <div class="col-12"><span class="text-muted small">Notas</span><div>@Model.Notas</div></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 sticky-top" style="top:80px;">
+            <div class="card-header fw-semibold">Estado del pedido</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="text-muted small">Número de orden</span>
+                    <div class="fw-bold fs-5 text-warning">@Model.NumeroOrden</div>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small">Fecha</span>
+                    <div>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                <div class="mb-4">
+                    <span class="text-muted small">Estado actual</span>
+                    @{
+                        var bc = Model.Estado switch {
+                            EstadoOrden.Entregada => "bg-success",
+                            EstadoOrden.Cancelada => "bg-danger",
+                            EstadoOrden.Enviada => "bg-info",
+                            EstadoOrden.Confirmada => "bg-primary",
+                            EstadoOrden.EnProceso => "bg-warning text-dark",
+                            _ => "bg-secondary"
+                        };
+                    }
+                    <div><span class="badge @bc fs-6 mt-1">@Model.Estado</span></div>
+                </div>
+
+                <form asp-action="CambiarEstado" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <label class="form-label fw-semibold small">Cambiar estado</label>
+                    <select name="estado" class="form-select mb-2">
+                        @foreach (EstadoOrden e in Enum.GetValues(typeof(EstadoOrden)))
+                        {
+                            <option value="@e" selected="@(Model.Estado == e ? "selected" : null)">@e</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-warning w-100 fw-semibold">
+                        <i class="fas fa-sync me-1"></i>Actualizar Estado
+                    </button>
+                </form>
+
+                <a asp-action="Ordenes" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="fas fa-arrow-left me-1"></i>Volver a órdenes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

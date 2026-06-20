@@ -1,0 +1,77 @@
+@using EcommerceDemo.Models
+@model List<Orden>
+@{
+    ViewData["Title"] = "Gestión de Órdenes";
+    ViewData["AdminPage"] = "ordenes";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    @{
+        var estados = new[] { ("", "Todas"), ("Pendiente", "Pendiente"), ("Confirmada", "Confirmada"),
+                              ("EnProceso", "En Proceso"), ("Enviada", "Enviada"), ("Entregada", "Entregada"), ("Cancelada", "Cancelada") };
+    }
+    @foreach (var (val, lbl) in estados)
+    {
+        <a asp-action="Ordenes" asp-route-estado="@val"
+           class="btn btn-sm @(ViewBag.EstadoFiltro == val || (val == "" && ViewBag.EstadoFiltro == null) ? "btn-dark" : "btn-outline-secondary")">
+            @lbl
+        </a>
+    }
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <p class="text-center text-muted py-5">No hay órdenes registradas.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Orden</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold small">@o.NumeroOrden</td>
+                            <td>
+                                <div class="small fw-semibold">@o.ClienteNombre</div>
+                                <div class="text-muted" style="font-size:0.75rem;">@o.ClienteEmail</div>
+                            </td>
+                            <td class="small text-muted">@o.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="fw-bold">$@o.Total.ToString("F2")</td>
+                            <td>
+                                @{
+                                    var bc = o.Estado switch {
+                                        EstadoOrden.Entregada => "bg-success",
+                                        EstadoOrden.Cancelada => "bg-danger",
+                                        EstadoOrden.Enviada => "bg-info",
+                                        EstadoOrden.Confirmada => "bg-primary",
+                                        EstadoOrden.EnProceso => "bg-warning text-dark",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @bc">@o.Estado</span>
+                            </td>
+                            <td>
+                                <a asp-action="DetalleOrden" asp-route-id="@o.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

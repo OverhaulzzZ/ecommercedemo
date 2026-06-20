@@ -1,0 +1,114 @@
+@using EcommerceDemo.Models
+@model Orden
+@{
+    ViewData["Title"] = "Checkout";
+    var items = ViewBag.Items as List<CarritoItem> ?? new();
+    decimal total = ViewBag.Total ?? 0m;
+    decimal envio = total >= 50 ? 0 : 5;
+}
+
+<div class="container py-4" style="max-width:960px;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="checkout-step active"><div class="step-num">1</div><span class="d-none d-sm-inline">Datos</span></div>
+        <div class="flex-grow-1 border-top border-2"></div>
+        <div class="checkout-step"><div class="step-num">2</div><span class="d-none d-sm-inline">Confirmación</span></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white fw-semibold">
+                    <i class="fas fa-user me-2"></i>Datos del cliente
+                </div>
+                <div class="card-body">
+                    <form asp-action="Confirmar" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Nombre completo *</label>
+                                <input asp-for="ClienteNombre" class="form-control" placeholder="Juan Pérez" />
+                                <span asp-validation-for="ClienteNombre" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Email *</label>
+                                <input asp-for="ClienteEmail" class="form-control" placeholder="juan@email.com" type="email" />
+                                <span asp-validation-for="ClienteEmail" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Teléfono *</label>
+                                <input asp-for="ClienteTelefono" class="form-control" placeholder="+1 555 123 4567" />
+                                <span asp-validation-for="ClienteTelefono" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Dirección de entrega</label>
+                                <input asp-for="ClienteDireccion" class="form-control" placeholder="Calle 123, Ciudad, País" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Notas adicionales</label>
+                                <textarea asp-for="Notas" class="form-control" rows="2"
+                                          placeholder="Instrucciones especiales, referencia del repuesto en tu auto..."></textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-3" />
+                        <h6 class="fw-semibold mb-3"><i class="fas fa-credit-card me-2 text-warning"></i>Método de pago</h6>
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <div class="form-check border rounded p-3">
+                                <input class="form-check-input" type="radio" name="metodoPago" value="transferencia" id="pago1" checked />
+                                <label class="form-check-label fw-semibold" for="pago1">
+                                    <i class="fas fa-university text-primary me-2"></i>Transferencia bancaria
+                                </label>
+                            </div>
+                            <div class="form-check border rounded p-3">
+                                <input class="form-check-input" type="radio" name="metodoPago" value="efectivo" id="pago2" />
+                                <label class="form-check-label fw-semibold" for="pago2">
+                                    <i class="fas fa-money-bill text-success me-2"></i>Contra entrega (efectivo)
+                                </label>
+                            </div>
+                            <div class="form-check border rounded p-3">
+                                <input class="form-check-input" type="radio" name="metodoPago" value="tarjeta" id="pago3" />
+                                <label class="form-check-label fw-semibold" for="pago3">
+                                    <i class="fas fa-credit-card text-warning me-2"></i>Tarjeta (simulado - demo)
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                            <i class="fas fa-check-circle me-2"></i>Confirmar Pedido — $@((total + envio).ToString("F2"))
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 sticky-top" style="top:80px;">
+                <div class="card-header bg-light fw-semibold">Resumen del pedido</div>
+                <div class="card-body p-3">
+                    @foreach (var item in items)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-2 small">
+                            <span>@item.Nombre <span class="badge bg-secondary">x@item.Cantidad</span></span>
+                            <span class="fw-semibold">$@item.Subtotal.ToString("F2")</span>
+                        </div>
+                    }
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>Subtotal</span><span>$@total.ToString("F2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>Envío</span>
+                        <span class="@(envio == 0 ? "text-success fw-semibold" : "")">@(envio == 0 ? "Gratis" : "$" + envio.ToString("F2"))</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total</span><span>$@((total + envio).ToString("F2"))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

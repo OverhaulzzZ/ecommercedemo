@@ -1,0 +1,168 @@
+@using EcommerceDemo.Models
+@{
+    ViewData["Title"] = "Inicio";
+    var categorias = ViewBag.Categorias as List<Categoria> ?? new();
+    var destacados = ViewBag.Destacados as List<Producto> ?? new();
+}
+
+<!-- Hero Banner -->
+<section class="hero-banner text-white">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <span class="badge bg-warning text-dark fw-semibold mb-3 px-3 py-2">
+                    <i class="fas fa-bolt me-1"></i>Envío gratis en pedidos +$50
+                </span>
+                <h1 class="display-4 fw-bold mb-3">
+                    Repuestos de <span class="text-warning">calidad</span><br />para tu vehículo
+                </h1>
+                <p class="lead text-white-50 mb-4">
+                    Más de 10,000 referencias originales y alternativas. Encuentra el repuesto exacto para tu auto con compatibilidad garantizada.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="Catalogo" asp-action="Index" class="btn btn-warning btn-lg fw-bold px-4">
+                        <i class="fas fa-search me-2"></i>Ver Catálogo
+                    </a>
+                    <a href="#categorias" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-th-large me-2"></i>Categorías
+                    </a>
+                </div>
+                <div class="row mt-4 g-3">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-shield-alt text-warning fa-lg"></i>
+                            <span class="small">Garantía 12 meses</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-truck text-warning fa-lg"></i>
+                            <span class="small">Entrega en 24-48h</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-headset text-warning fa-lg"></i>
+                            <span class="small">Soporte técnico</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <div class="text-center" style="font-size:10rem; opacity:0.15;">
+                    <i class="fas fa-car-side"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorías -->
+<section id="categorias" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-4">Compra por Categoría</h2>
+        <div class="row g-3 justify-content-center">
+            @{
+                var colores = new[] { "warning", "primary", "success", "danger", "info", "secondary" };
+                int ci = 0;
+            }
+            @foreach (var cat in categorias)
+            {
+                var color = colores[ci % colores.Length];
+                ci++;
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="@cat.Id"
+                       class="cat-card d-block text-center p-3 bg-white shadow-sm h-100">
+                        <div class="cat-icon-circle bg-@color bg-opacity-10 mb-2">
+                            <i class="fas @cat.Icono text-@color"></i>
+                        </div>
+                        <span class="fw-semibold small text-dark">@cat.Nombre</span>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Productos Destacados</h2>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn btn-outline-dark btn-sm">
+                Ver todos <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row g-3">
+            @foreach (var p in destacados)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card product-card h-100 shadow-sm">
+                        <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id" class="text-decoration-none">
+                            <div class="product-img-wrapper">
+                                <div class="img-placeholder w-100 h-100" style="min-height:200px;">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="card-body d-flex flex-column gap-1">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary small w-fit">@p.Categoria?.Nombre</span>
+                            <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id" class="text-decoration-none text-dark">
+                                <h6 class="card-title mb-1 fw-semibold">@p.Nombre</h6>
+                            </a>
+                            <p class="text-muted small mb-1">@p.Marca</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="precio-tag-sm">$@p.Precio.ToString("F2")</span>
+                                    @if (p.Stock > 5)
+                                    {
+                                        <span class="badge badge-stock-ok small">En stock</span>
+                                    }
+                                    else if (p.Stock > 0)
+                                    {
+                                        <span class="badge badge-stock-low small">Últimas @p.Stock</span>
+                                    }
+                                </div>
+                                <form asp-controller="Carrito" asp-action="Agregar" method="post" class="mt-2">
+                                    <input type="hidden" name="productoId" value="@p.Id" />
+                                    <input type="hidden" name="cantidad" value="1" />
+                                    <button type="submit" class="btn btn-add-cart w-100 btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Agregar al carrito
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Banner de confianza -->
+<section class="bg-warning py-4">
+    <div class="container">
+        <div class="row g-3 text-center text-dark">
+            <div class="col-6 col-md-3">
+                <i class="fas fa-shipping-fast fa-2x mb-2"></i>
+                <p class="fw-semibold mb-0 small">Envío Rápido</p>
+                <p class="small mb-0">24-48 horas hábiles</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="fas fa-medal fa-2x mb-2"></i>
+                <p class="fw-semibold mb-0 small">Calidad Garantizada</p>
+                <p class="small mb-0">Piezas originales y alternas</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="fas fa-undo-alt fa-2x mb-2"></i>
+                <p class="fw-semibold mb-0 small">Devoluciones</p>
+                <p class="small mb-0">30 días sin preguntas</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="fas fa-lock fa-2x mb-2"></i>
+                <p class="fw-semibold mb-0 small">Pago Seguro</p>
+                <p class="small mb-0">Transacciones encriptadas</p>
+            </div>
+        </div>
+    </div>
+</section>

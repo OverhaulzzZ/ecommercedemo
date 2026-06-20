@@ -1,0 +1,76 @@
+@using EcommerceDemo.Models
+@model List<Producto>
+@{
+    ViewData["Title"] = "Gestión de Productos";
+    ViewData["AdminPage"] = "productos";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <form method="get" class="d-flex gap-2">
+        <input type="search" name="q" class="form-control form-control-sm" placeholder="Buscar producto..." value="@ViewBag.Busqueda" style="width:250px;" />
+        <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-search"></i></button>
+    </form>
+    <a asp-action="CrearProducto" class="btn btn-warning fw-semibold btn-sm">
+        <i class="fas fa-plus me-1"></i>Nuevo Producto
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>SKU</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold small">@p.Nombre</div>
+                            <div class="text-muted" style="font-size:0.75rem;">@p.Marca</div>
+                        </td>
+                        <td class="small text-muted">@p.SKU</td>
+                        <td class="small">@p.Categoria?.Nombre</td>
+                        <td class="fw-semibold">$@p.Precio.ToString("F2")</td>
+                        <td>
+                            <span class="badge @(p.Stock == 0 ? "badge-stock-out" : p.Stock < 10 ? "badge-stock-low" : "badge-stock-ok")">
+                                @p.Stock
+                            </span>
+                        </td>
+                        <td>
+                            @if (p.Activo)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="EditarProducto" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-action="EliminarProducto" method="post" onsubmit="return confirm('¿Desactivar este producto?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

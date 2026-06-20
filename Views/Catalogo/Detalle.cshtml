@@ -1,0 +1,136 @@
+@using EcommerceDemo.Models
+@model Producto
+@{
+    ViewData["Title"] = Model.Nombre;
+    var relacionados = ViewBag.Relacionados as List<Producto> ?? new();
+}
+
+<div class="bg-light border-bottom py-2 px-3">
+    <div class="container">
+        <small class="text-muted">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
+            <i class="fas fa-chevron-right mx-1 small"></i>
+            <a asp-controller="Catalogo" asp-action="Index" class="text-decoration-none">Catálogo</a>
+            <i class="fas fa-chevron-right mx-1 small"></i>
+            <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="@Model.CategoriaId" class="text-decoration-none">@Model.Categoria?.Nombre</a>
+            <i class="fas fa-chevron-right mx-1 small"></i>
+            <span>@Model.Nombre</span>
+        </small>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Imagen -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm">
+                <div class="img-placeholder rounded" style="min-height:350px; font-size:5rem;">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info producto -->
+        <div class="col-md-7">
+            <div class="d-flex gap-2 mb-2">
+                <span class="badge bg-warning text-dark">@Model.Categoria?.Nombre</span>
+                @if (Model.Destacado) { <span class="badge bg-success">Destacado</span> }
+            </div>
+            <h1 class="h3 fw-bold">@Model.Nombre</h1>
+            <p class="text-muted mb-1">Marca: <strong>@Model.Marca</strong> &nbsp;|&nbsp; SKU: <strong>@Model.SKU</strong></p>
+
+            <div class="d-flex align-items-center gap-3 my-3">
+                <span class="precio-tag">$@Model.Precio.ToString("F2")</span>
+                @if (Model.Stock > 10)
+                {
+                    <span class="badge badge-stock-ok px-3 py-2"><i class="fas fa-check-circle me-1"></i>En stock (@Model.Stock unidades)</span>
+                }
+                else if (Model.Stock > 0)
+                {
+                    <span class="badge badge-stock-low px-3 py-2"><i class="fas fa-exclamation-triangle me-1"></i>Últimas @Model.Stock unidades</span>
+                }
+                else
+                {
+                    <span class="badge badge-stock-out px-3 py-2"><i class="fas fa-times-circle me-1"></i>Agotado</span>
+                }
+            </div>
+
+            <p class="text-muted">@Model.Descripcion</p>
+
+            <div class="card bg-light border-0 p-3 mb-3">
+                <h6 class="fw-semibold mb-1"><i class="fas fa-car me-2 text-warning"></i>Compatibilidad</h6>
+                <p class="mb-0 small">@Model.CompatibilidadAutos</p>
+            </div>
+
+            @if (Model.Stock > 0)
+            {
+                <form asp-controller="Carrito" asp-action="Agregar" method="post" class="d-flex gap-2 align-items-center">
+                    <input type="hidden" name="productoId" value="@Model.Id" />
+                    <div class="input-group" style="width:120px;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="cambiarCantidad(-1)">-</button>
+                        <input type="number" id="inputCantidad" name="cantidad" value="1" min="1" max="@Model.Stock"
+                               class="form-control text-center form-control-sm" />
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="cambiarCantidad(1)">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-add-cart btn-lg px-4">
+                        <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                    </button>
+                </form>
+            }
+
+            <div class="row g-2 mt-3">
+                <div class="col-auto">
+                    <span class="badge bg-light text-dark border"><i class="fas fa-shield-alt text-success me-1"></i>Garantía 12 meses</span>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-light text-dark border"><i class="fas fa-truck text-primary me-1"></i>Envío 24-48h</span>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-light text-dark border"><i class="fas fa-undo text-warning me-1"></i>30 días devolución</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relacionados -->
+    @if (relacionados.Any())
+    {
+        <div class="mt-5">
+            <h4 class="section-title mb-3">Productos Relacionados</h4>
+            <div class="row g-3">
+                @foreach (var r in relacionados)
+                {
+                    <div class="col-sm-6 col-md-3">
+                        <div class="card product-card h-100 shadow-sm">
+                            <div class="product-img-wrapper">
+                                <div class="img-placeholder w-100 h-100" style="min-height:150px; font-size:2.5rem;">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                            </div>
+                            <div class="card-body p-3">
+                                <h6 class="fw-semibold small mb-1">@r.Nombre</h6>
+                                <p class="text-muted small mb-2">@r.Marca</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="precio-tag-sm">$@r.Precio.ToString("F2")</span>
+                                    <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@r.Id"
+                                       class="btn btn-outline-dark btn-sm">Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+function cambiarCantidad(delta) {
+    const input = document.getElementById('inputCantidad');
+    const val = parseInt(input.value) + delta;
+    const max = parseInt(input.max);
+    if (val >= 1 && val <= max) input.value = val;
+}
+</script>
+}

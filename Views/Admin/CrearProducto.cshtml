@@ -1,0 +1,77 @@
+@using EcommerceDemo.Models
+@model Producto
+@{
+    ViewData["Title"] = "Nuevo Producto";
+    ViewData["AdminPage"] = "productos";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    var categorias = ViewBag.Categorias as List<Categoria> ?? new();
+}
+
+<div class="card shadow-sm border-0" style="max-width:800px;">
+    <div class="card-body">
+        <form asp-action="CrearProducto" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold small">Nombre *</label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Nombre del repuesto" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">SKU *</label>
+                    <input asp-for="SKU" class="form-control" placeholder="MAR-CAT-001" />
+                    <span asp-validation-for="SKU" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Categoría *</label>
+                    <select asp-for="CategoriaId" class="form-select">
+                        @foreach (var c in categorias)
+                        {
+                            <option value="@c.Id">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Precio *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="Precio" class="form-control" placeholder="0.00" type="number" step="0.01" min="0" />
+                    </div>
+                    <span asp-validation-for="Precio" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Stock</label>
+                    <input asp-for="Stock" class="form-control" type="number" min="0" placeholder="0" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Marca</label>
+                    <input asp-for="Marca" class="form-control" placeholder="Bosch, NGK, Monroe..." />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">URL de Imagen</label>
+                    <input asp-for="ImagenUrl" class="form-control" placeholder="/img/repuesto.png" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold small">Descripción</label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Descripción detallada del repuesto..."></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold small">Compatibilidad con autos</label>
+                    <input asp-for="CompatibilidadAutos" class="form-control" placeholder="Toyota Corolla 2015-2023, Honda Civic 2014-2022..." />
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input asp-for="Destacado" class="form-check-input" type="checkbox" />
+                        <label asp-for="Destacado" class="form-check-label">Mostrar como producto destacado en el inicio</label>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-warning fw-semibold"><i class="fas fa-save me-1"></i>Guardar Producto</button>
+                <a asp-action="Productos" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
